@@ -1,6 +1,7 @@
 # ExpenseFlow
 
 Simple, smart personal finance tracking. ExpenseFlow is a lightweight, fully client-side expense tracker for recording income and expenses, reviewing totals, and understanding where money goes.
+**Live Demo:** https://adithyankrishna.github.io/expense-tracker-adithyan-krishna/
 
 ## Features
 
