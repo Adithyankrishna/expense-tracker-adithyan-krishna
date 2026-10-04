@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ExpenseFlow — simple, smart personal finance tracking." />
+  <title>ExpenseFlow — Expense Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">EF</div>
+        <div>
+          <h1 class="brand-name">ExpenseFlow</h1>
+          <p class="brand-sub">Simple, smart personal finance tracking.</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <time id="current-date" class="current-date"></time>
+        <button type="button" class="btn btn-primary" id="add-btn">+ Add Transaction</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Summary cards -->
+    <section class="summary" aria-label="Financial summary">
+      <article class="card stat">
+        <p class="stat-label">Total Income</p>
+        <p class="stat-value income" id="total-income">₹0.00</p>
+      </article>
+      <article class="card stat">
+        <p class="stat-label">Total Expenses</p>
+        <p class="stat-value expense" id="total-expense">₹0.00</p>
+      </article>
+      <article class="card stat">
+        <p class="stat-label">Current Balance</p>
+        <p class="stat-value" id="total-balance">₹0.00</p>
+      </article>
+    </section>
+
+    <!-- Bonus: monthly summary + category chart -->
+    <section class="insights">
+      <article class="card">
+        <div class="card-head">
+          <h2>Monthly Summary</h2>
+          <label class="sr-only" for="month-select">Select month</label>
+          <input type="month" id="month-select" class="input input-sm" />
+        </div>
+        <dl class="month-grid">
+          <div><dt>Income</dt><dd class="income" id="month-income">₹0.00</dd></div>
+          <div><dt>Expenses</dt><dd class="expense" id="month-expense">₹0.00</dd></div>
+          <div><dt>Balance</dt><dd id="month-balance">₹0.00</dd></div>
+        </dl>
+      </article>
+      <article class="card">
+        <div class="card-head"><h2>Expenses by Category</h2></div>
+        <ul class="chart" id="category-chart" aria-label="Expense distribution by category"></ul>
+      </article>
+    </section>
+
+    <!-- Transactions -->
+    <section class="card transactions" aria-labelledby="tx-title">
+      <div class="card-head">
+        <h2 id="tx-title">Transactions</h2>
+        <button type="button" class="btn btn-ghost" id="demo-btn">Load Demo Data</button>
+      </div>
+
+      <div class="filters" role="search">
+        <div class="field">
+          <label for="search-input">Search</label>
+          <input type="search" id="search-input" class="input" placeholder="Description or category" />
+        </div>
+        <div class="field">
+          <label for="filter-type">Type</label>
+          <select id="filter-type" class="input">
+            <option value="all">All</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="filter-category">Category</label>
+          <select id="filter-category" class="input"></select>
+        </div>
+        <div class="field">
+          <label for="sort-select">Sort by</label>
+          <select id="sort-select" class="input">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="highest">Highest amount</option>
+            <option value="lowest">Lowest amount</option>
+          </select>
+        </div>
+        <button type="button" class="btn btn-ghost clear-btn" id="clear-filters">Clear Filters</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="tx-table">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Description</th>
+              <th scope="col">Category</th>
+              <th scope="col">Type</th>
+              <th scope="col" class="num">Amount</th>
+              <th scope="col" class="num">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tx-body"></tbody>
+        </table>
+      </div>
+
+      <div class="empty" id="empty-state" hidden>
+        <h3 id="empty-title">No transactions yet</h3>
+        <p id="empty-text">Add your first income or expense to start tracking your finances.</p>
+        <button type="button" class="btn btn-primary" id="empty-add-btn">+ Add Transaction</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">ExpenseFlow · Data is stored locally in your browser.</footer>
+
+  <!-- Add / Edit modal -->
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <h2 id="modal-title">Add Transaction</h2>
+        <button type="button" class="modal-close" id="close-btn" aria-label="Close transaction form">&times;</button>
+      </div>
+      <form id="tx-form" novalidate>
+        <fieldset class="type-toggle">
+          <legend class="sr-only">Transaction type</legend>
+          <label><input type="radio" name="type" value="expense" checked /> <span>Expense</span></label>
+          <label><input type="radio" name="type" value="income" /> <span>Income</span></label>
+        </fieldset>
+
+        <div class="field">
+          <label for="amount">Amount (₹)</label>
+          <input type="number" id="amount" name="amount" class="input" step="0.01" min="0.01" max="99999999.99" inputmode="decimal" required aria-describedby="amount-error" />
+          <p class="error" id="amount-error" role="alert"></p>
+        </div>
+        <div class="field">
+          <label for="category">Category</label>
+          <select id="category" name="category" class="input" required aria-describedby="category-error"></select>
+          <p class="error" id="category-error" role="alert"></p>
+        </div>
+        <div class="field">
+          <label for="date">Date</label>
+          <input type="date" id="date" name="date" class="input" required aria-describedby="date-error" />
+          <p class="error" id="date-error" role="alert"></p>
+        </div>
+        <div class="field">
+          <label for="description">Description <span class="muted">(optional)</span></label>
+          <input type="text" id="description" name="description" class="input" maxlength="150" aria-describedby="description-error description-count" />
+          <div class="field-meta">
+            <p class="error" id="description-error" role="alert"></p>
+            <span class="muted" id="description-count">0/150</span>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submit-btn">Add Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
